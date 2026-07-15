@@ -6,9 +6,6 @@ on:
 jobs:
   build:
     runs-on: windows-2022
-    strategy:
-      fail-fast: false
-
     steps:
     - name: Checkout GROMACS source
       uses: actions/checkout@v7

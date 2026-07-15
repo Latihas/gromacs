@@ -32,6 +32,7 @@ jobs:
           -D GMX_GPU=CUDA `
           -D GMX_EXTERNAL_BLAS=OFF `
           -D GMX_EXTERNAL_LAPACK=OFF `
+          -D GMX_BUILD_OWN_FFTW=ON `
           -D GMXAPI=OFF `
           -D GMX_INSTALL_NBLIB_API=OFF `
           -D OpenMP_CUDA_FLAGS="-Xcompiler=-openmp" `

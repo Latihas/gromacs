@@ -34,7 +34,7 @@ jobs:
         cmake . -A x64 `
           -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/fftw3311" `
           -DENABLE_SSE2=ON `
-          -DENABLE_AVX2=ON `         
+          -DENABLE_AVX2=ON `
           -DENABLE_FLOAT=ON `
           -DBUILD_SHARED_LIBS=ON
         cmake --build . --target INSTALL --config Release

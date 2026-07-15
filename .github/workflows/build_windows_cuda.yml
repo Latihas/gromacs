@@ -17,13 +17,27 @@ jobs:
     - name: Set up MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Setup CUDA
-      uses: Jimver/cuda-toolkit@v0.2.35
+      uses: Jimver/cuda-toolkit@v0.2
       with:
         cuda: 12.4.0
     - name: Verify CUDA installation
       run: nvcc --version
     - name: Verify CUDA installation2
       run: dir "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.4"
+    - name: Download FFTW source
+      run: |
+        curl -L http://www.fftw.org/fftw-3.3.11.tar.gz -o fftw-3.3.11.tar.gz
+        tar -xzf fftw-3.3.11.tar.gz
+    - name: Build and install FFTW
+      working-directory: fftw-3.3.11
+      run: |
+        cmake . -A x64 `
+          -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/fftw3311" `
+          -DENABLE_SSE2=ON `
+          -DENABLE_AVX2=ON `         
+          -DENABLE_FLOAT=ON `
+          -DBUILD_SHARED_LIBS=ON
+        cmake --build . --target INSTALL --config Release
     - name: Configure CMake
       run: |
         cmake -S . -B build -A x64 `
@@ -32,7 +46,8 @@ jobs:
           -D GMX_GPU=CUDA `
           -D GMX_EXTERNAL_BLAS=OFF `
           -D GMX_EXTERNAL_LAPACK=OFF `
-          -D GMX_BUILD_OWN_FFTW=ON `
+          -D GMX_FFT_LIBRARY=fftw3 `
+          -D CMAKE_PREFIX_PATH="${{ github.workspace }}/fftw3311" `
           -D GMXAPI=OFF `
           -D GMX_INSTALL_NBLIB_API=OFF `
           -D OpenMP_CUDA_FLAGS="-Xcompiler=-openmp" `
@@ -41,8 +56,10 @@ jobs:
       run: cmake --build build --config Release --parallel 4
     - name: Install
       run: cmake --install build --config Release
+    - name: Copy FFTW DLL to install bin
+      run: xcopy /E /I "${{ github.workspace }}/fftw3311/bin" "${{ github.workspace }}/install/bin"
     - name: Upload Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: gromacs-windows-cuda
         path: install/

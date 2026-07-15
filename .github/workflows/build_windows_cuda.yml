@@ -57,7 +57,7 @@ jobs:
     - name: Install
       run: cmake --install build --config Release
     - name: Copy FFTW DLL to install bin
-      run: xcopy /E /I "${{ github.workspace }}/fftw3311/bin" "${{ github.workspace }}/install/bin"
+      run: xcopy /E /I "${{ github.workspace }}\fftw3311\bin" "${{ github.workspace }}\install\bin"
     - name: Upload Artifact
       uses: actions/upload-artifact@v7
       with:

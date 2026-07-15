@@ -17,7 +17,7 @@ jobs:
     - name: Set up MSVC
       uses: ilammy/msvc-dev-cmd@v1
     - name: Setup CUDA
-      uses: Jimver/cuda-toolkit@v0.2
+      uses: Jimver/cuda-toolkit@v0.2.35
       with:
         cuda: 12.4.0
     - name: Verify CUDA installation

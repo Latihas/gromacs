@@ -1,0 +1,47 @@
+name: Build GROMACS (Windows CUDA)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+
+    steps:
+    - name: Checkout GROMACS source
+      uses: actions/checkout@v7
+      with:
+        ref: 'v2026.3'
+    - name: Set up MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: Setup CUDA
+      uses: Jimver/cuda-toolkit@v0.2.35
+      with:
+        cuda: 12.4.0
+    - name: Verify CUDA installation
+      run: nvcc --version
+    - name: Verify CUDA installation2
+      run: dir "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.4"
+    - name: Configure CMake
+      run: |
+        cmake -S . -B build -A x64 `
+          -D CMAKE_BUILD_TYPE=Release `
+          -D CMAKE_INSTALL_PREFIX="${{ github.workspace }}/install" `
+          -D GMX_GPU=CUDA `
+          -D GMX_EXTERNAL_BLAS=OFF `
+          -D GMX_EXTERNAL_LAPACK=OFF `
+          -D GMXAPI=OFF `
+          -D GMX_INSTALL_NBLIB_API=OFF `
+          -D OpenMP_CUDA_FLAGS="-Xcompiler=-openmp" `
+          -D OpenMP_CUDA_LIB_NAMES=""
+    - name: Build
+      run: cmake --build build --config Release --parallel 4
+    - name: Install
+      run: cmake --install build --config Release
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: gromacs-windows-cuda
+        path: install/

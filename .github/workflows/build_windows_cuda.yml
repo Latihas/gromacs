@@ -2,7 +2,8 @@ name: Build GROMACS (Windows CUDA)
 
 on:
   workflow_dispatch:
-
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: windows-2022
@@ -55,8 +56,19 @@ jobs:
       run: cmake --install build --config Release
     - name: Copy FFTW DLL to install bin
       run: xcopy /E /I "${{ github.workspace }}\fftw3311\bin" "${{ github.workspace }}\install\bin"
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v7
+    - name: GenVersion
+      id: generate_version
+      shell: bash
+      run: |
+        time=$(date +'%Y%m%d%H%M%S')
+        echo "VERSION=$time" >> $GITHUB_OUTPUT
+    - name: Package installation as 7z
+      shell: cmd
+      run: |
+        "C:\Program Files\7-Zip\7z.exe" a -mx9 gromacs.7z .\install
+    - name: Release
+      uses: softprops/action-gh-release@v3
       with:
-        name: gromacs-windows-cuda
-        path: install/
+        tag_name: ${{ steps.generate_version.outputs.VERSION }}
+        name: Release ${{ steps.generate_version.outputs.VERSION }}
+        files: gromacs.7z
